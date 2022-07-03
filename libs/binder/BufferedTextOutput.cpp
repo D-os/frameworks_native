@@ -16,7 +16,6 @@
 
 #include "BufferedTextOutput.h"
 
-#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
@@ -90,7 +89,7 @@ struct BufferedTextOutput::ThreadState
 
 static pthread_mutex_t gMutex = PTHREAD_MUTEX_INITIALIZER;
 
-static volatile int32_t gSequence = 0;
+static volatile std::atomic<int32_t> gSequence(0);
 
 static volatile int32_t gFreeBufferIndex = -1;
 
@@ -127,7 +126,7 @@ static void freeBufferIndex(int32_t idx)
 
 BufferedTextOutput::BufferedTextOutput(uint32_t flags)
     : mFlags(flags)
-    , mSeq(android_atomic_inc(&gSequence))
+    , mSeq(std::atomic_fetch_add_explicit(&gSequence, 1, std::memory_order_release))
     , mIndex(allocBufferIndex())
 {
     mGlobalState = new BufferState(mSeq);
