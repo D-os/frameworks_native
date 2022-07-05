@@ -1237,18 +1237,18 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
         }
         break;
 
-    case BR_TRANSACTION_SEC_CTX:
+    // case BR_TRANSACTION_SEC_CTX:
     case BR_TRANSACTION:
         {
-            binder_transaction_data_secctx tr_secctx;
-            binder_transaction_data& tr = tr_secctx.transaction_data;
+            // binder_transaction_data_secctx tr_secctx;
+            binder_transaction_data tr; // = tr_secctx.transaction_data;
 
-            if (cmd == (int) BR_TRANSACTION_SEC_CTX) {
-                result = mIn.read(&tr_secctx, sizeof(tr_secctx));
-            } else {
+            // if (cmd == (int) BR_TRANSACTION_SEC_CTX) {
+            //     result = mIn.read(&tr_secctx, sizeof(tr_secctx));
+            // } else {
                 result = mIn.read(&tr, sizeof(tr));
-                tr_secctx.secctx = 0;
-            }
+            //     tr_secctx.secctx = 0;
+            // }
 
             ALOG_ASSERT(result == NO_ERROR,
                 "Not enough command data for brTRANSACTION");
@@ -1278,7 +1278,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             clearPropagateWorkSource();
 
             mCallingPid = tr.sender_pid;
-            mCallingSid = reinterpret_cast<const char*>(tr_secctx.secctx);
+            // mCallingSid = reinterpret_cast<const char*>(tr_secctx.secctx);
             mCallingUid = tr.sender_euid;
             mLastTransactionBinderFlags = tr.flags;
 
@@ -1321,8 +1321,8 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
                 LOG_ONEWAY("Sending reply to %d!", mCallingPid);
                 if (error < NO_ERROR) reply.setError(error);
 
-                constexpr uint32_t kForwardReplyFlags = TF_CLEAR_BUF;
-                sendReply(reply, (tr.flags & kForwardReplyFlags));
+                // constexpr uint32_t kForwardReplyFlags = TF_CLEAR_BUF;
+                sendReply(reply, (tr.flags /*& kForwardReplyFlags*/));
             } else {
                 if (error != OK) {
                     alog << "oneway function results for code " << tr.code

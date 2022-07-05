@@ -201,11 +201,11 @@ bool ProcessState::becomeContextManager()
 {
     AutoMutex _l(mLock);
 
-    flat_binder_object obj {
-        .flags = FLAT_BINDER_FLAG_TXN_SECURITY_CTX,
-    };
+    // flat_binder_object obj {
+    //     .flags = FLAT_BINDER_FLAG_TXN_SECURITY_CTX,
+    // };
 
-    int result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR_EXT, &obj);
+    int result = -1; // ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR_EXT, &obj);
 
     // fallback to original method
     if (result != 0) {
@@ -260,23 +260,23 @@ ssize_t ProcessState::getKernelReferences(size_t buf_count, uintptr_t* buf)
 ssize_t ProcessState::getStrongRefCountForNode(const sp<BpBinder>& binder) {
     if (binder->isRpcBinder()) return -1;
 
-    binder_node_info_for_ref info;
-    memset(&info, 0, sizeof(binder_node_info_for_ref));
+    // binder_node_info_for_ref info;
+    // memset(&info, 0, sizeof(binder_node_info_for_ref));
 
-    info.handle = binder->getPrivateAccessor().binderHandle();
+    // info.handle = binder->getPrivateAccessor().binderHandle();
 
-    status_t result = ioctl(mDriverFD, BINDER_GET_NODE_INFO_FOR_REF, &info);
+    // status_t result = ioctl(mDriverFD, BINDER_GET_NODE_INFO_FOR_REF, &info);
 
-    if (result != OK) {
-        static bool logged = false;
-        if (!logged) {
-          ALOGW("Kernel does not support BINDER_GET_NODE_INFO_FOR_REF.");
-          logged = true;
-        }
+    // if (result != OK) {
+    //     static bool logged = false;
+    //     if (!logged) {
+    //       ALOGW("Kernel does not support BINDER_GET_NODE_INFO_FOR_REF.");
+    //       logged = true;
+    //     }
         return -1;
-    }
+    // }
 
-    return info.strong_count;
+    // return info.strong_count;
 }
 
 void ProcessState::setCallRestriction(CallRestriction restriction) {
