@@ -198,7 +198,7 @@ static bool meetsDeclarationRequirements(const sp<IBinder>& binder, const std::s
 }
 #endif  // !VENDORSERVICEMANAGER
 
-ServiceManager::ServiceManager(std::unique_ptr<Access>&& access) : mAccess(std::move(access)) {
+ServiceManager::ServiceManager(/*std::unique_ptr<Access>&& access*/) /*: mAccess(std::move(access))*/ {
 // TODO(b/151696835): reenable performance hack when we solve bug, since with
 //     this hack and other fixes, it is unlikely we will see even an ephemeral
 //     failure when the manifest parse fails. The goal is that the manifest will
@@ -242,27 +242,27 @@ Status ServiceManager::checkService(const std::string& name, sp<IBinder>* outBin
 }
 
 sp<IBinder> ServiceManager::tryGetService(const std::string& name, bool startIfNotFound) {
-    auto ctx = mAccess->getCallingContext();
+    // auto ctx = mAccess->getCallingContext();
 
     sp<IBinder> out;
     Service* service = nullptr;
     if (auto it = mNameToService.find(name); it != mNameToService.end()) {
         service = &(it->second);
 
-        if (!service->allowIsolated) {
-            uid_t appid = multiuser_get_app_id(ctx.uid);
-            bool isIsolated = appid >= AID_ISOLATED_START && appid <= AID_ISOLATED_END;
+        // if (!service->allowIsolated) {
+        //     uid_t appid = multiuser_get_app_id(ctx.uid);
+        //     bool isIsolated = appid >= AID_ISOLATED_START && appid <= AID_ISOLATED_END;
 
-            if (isIsolated) {
-                return nullptr;
-            }
-        }
+        //     if (isIsolated) {
+        //         return nullptr;
+        //     }
+        // }
         out = service->binder;
     }
 
-    if (!mAccess->canFind(ctx, name)) {
-        return nullptr;
-    }
+    // if (!mAccess->canFind(ctx, name)) {
+    //     return nullptr;
+    // }
 
     if (!out && startIfNotFound) {
         tryStartService(name);
@@ -293,15 +293,15 @@ bool isValidServiceName(const std::string& name) {
 }
 
 Status ServiceManager::addService(const std::string& name, const sp<IBinder>& binder, bool allowIsolated, int32_t dumpPriority) {
-    auto ctx = mAccess->getCallingContext();
+    // auto ctx = mAccess->getCallingContext();
 
-    if (multiuser_get_app_id(ctx.uid) >= AID_APP) {
-        return Status::fromExceptionCode(Status::EX_SECURITY, "App UIDs cannot add services");
-    }
+    // if (multiuser_get_app_id(ctx.uid) >= AID_APP) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY, "App UIDs cannot add services");
+    // }
 
-    if (!mAccess->canAdd(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY, "SELinux denial");
-    }
+    // if (!mAccess->canAdd(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY, "SELinux denial");
+    // }
 
     if (binder == nullptr) {
         return Status::fromExceptionCode(Status::EX_ILLEGAL_ARGUMENT, "Null binder");
@@ -331,7 +331,7 @@ Status ServiceManager::addService(const std::string& name, const sp<IBinder>& bi
         .binder = binder,
         .allowIsolated = allowIsolated,
         .dumpPriority = dumpPriority,
-        .debugPid = ctx.debugPid,
+        // .debugPid = ctx.debugPid,
     };
 
     auto it = mNameToRegistrationCallback.find(name);
@@ -347,9 +347,9 @@ Status ServiceManager::addService(const std::string& name, const sp<IBinder>& bi
 }
 
 Status ServiceManager::listServices(int32_t dumpPriority, std::vector<std::string>* outList) {
-    if (!mAccess->canList(mAccess->getCallingContext())) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canList(mAccess->getCallingContext())) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     size_t toReserve = 0;
     for (auto const& [name, service] : mNameToService) {
@@ -374,11 +374,11 @@ Status ServiceManager::listServices(int32_t dumpPriority, std::vector<std::strin
 
 Status ServiceManager::registerForNotifications(
         const std::string& name, const sp<IServiceCallback>& callback) {
-    auto ctx = mAccess->getCallingContext();
+    // auto ctx = mAccess->getCallingContext();
 
-    if (!mAccess->canFind(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canFind(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     if (!isValidServiceName(name)) {
         LOG(ERROR) << "Invalid service name: " << name;
@@ -410,11 +410,11 @@ Status ServiceManager::registerForNotifications(
 }
 Status ServiceManager::unregisterForNotifications(
         const std::string& name, const sp<IServiceCallback>& callback) {
-    auto ctx = mAccess->getCallingContext();
+    // auto ctx = mAccess->getCallingContext();
 
-    if (!mAccess->canFind(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canFind(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     bool found = false;
 
@@ -431,12 +431,12 @@ Status ServiceManager::unregisterForNotifications(
     return Status::ok();
 }
 
-Status ServiceManager::isDeclared(const std::string& name, bool* outReturn) {
-    auto ctx = mAccess->getCallingContext();
+Status ServiceManager::isDeclared(const std::string& /*name*/, bool* outReturn) {
+    // auto ctx = mAccess->getCallingContext();
 
-    if (!mAccess->canFind(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canFind(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     *outReturn = false;
 
@@ -446,8 +446,8 @@ Status ServiceManager::isDeclared(const std::string& name, bool* outReturn) {
     return Status::ok();
 }
 
-binder::Status ServiceManager::getDeclaredInstances(const std::string& interface, std::vector<std::string>* outReturn) {
-    auto ctx = mAccess->getCallingContext();
+binder::Status ServiceManager::getDeclaredInstances(const std::string& /*interface*/, std::vector<std::string>* outReturn) {
+    // auto ctx = mAccess->getCallingContext();
 
     std::vector<std::string> allInstances;
 #ifndef VENDORSERVICEMANAGER
@@ -457,9 +457,9 @@ binder::Status ServiceManager::getDeclaredInstances(const std::string& interface
     outReturn->clear();
 
     for (const std::string& instance : allInstances) {
-        if (mAccess->canFind(ctx, interface + "/" + instance)) {
+        // if (mAccess->canFind(ctx, interface + "/" + instance)) {
             outReturn->push_back(instance);
-        }
+        // }
     }
 
     if (outReturn->size() == 0 && allInstances.size() != 0) {
@@ -469,13 +469,13 @@ binder::Status ServiceManager::getDeclaredInstances(const std::string& interface
     return Status::ok();
 }
 
-Status ServiceManager::updatableViaApex(const std::string& name,
+Status ServiceManager::updatableViaApex(const std::string& /*name*/,
                                         std::optional<std::string>* outReturn) {
-    auto ctx = mAccess->getCallingContext();
+    // auto ctx = mAccess->getCallingContext();
 
-    if (!mAccess->canFind(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canFind(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     *outReturn = std::nullopt;
 
@@ -485,13 +485,13 @@ Status ServiceManager::updatableViaApex(const std::string& name,
     return Status::ok();
 }
 
-Status ServiceManager::getConnectionInfo(const std::string& name,
+Status ServiceManager::getConnectionInfo(const std::string& /*name*/,
                                          std::optional<ConnectionInfo>* outReturn) {
-    auto ctx = mAccess->getCallingContext();
+    // auto ctx = mAccess->getCallingContext();
 
-    if (!mAccess->canFind(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canFind(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     *outReturn = std::nullopt;
 
@@ -560,10 +560,10 @@ Status ServiceManager::registerClientCallback(const std::string& name, const sp<
         return Status::fromExceptionCode(Status::EX_NULL_POINTER);
     }
 
-    auto ctx = mAccess->getCallingContext();
-    if (!mAccess->canAdd(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // auto ctx = mAccess->getCallingContext();
+    // if (!mAccess->canAdd(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     auto serviceIt = mNameToService.find(name);
     if (serviceIt == mNameToService.end()) {
@@ -695,10 +695,10 @@ Status ServiceManager::tryUnregisterService(const std::string& name, const sp<IB
         return Status::fromExceptionCode(Status::EX_NULL_POINTER);
     }
 
-    auto ctx = mAccess->getCallingContext();
-    if (!mAccess->canAdd(ctx, name)) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // auto ctx = mAccess->getCallingContext();
+    // if (!mAccess->canAdd(ctx, name)) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     auto serviceIt = mNameToService.find(name);
     if (serviceIt == mNameToService.end()) {
@@ -746,9 +746,9 @@ Status ServiceManager::tryUnregisterService(const std::string& name, const sp<IB
 }
 
 Status ServiceManager::getServiceDebugInfo(std::vector<ServiceDebugInfo>* outReturn) {
-    if (!mAccess->canList(mAccess->getCallingContext())) {
-        return Status::fromExceptionCode(Status::EX_SECURITY);
-    }
+    // if (!mAccess->canList(mAccess->getCallingContext())) {
+    //     return Status::fromExceptionCode(Status::EX_SECURITY);
+    // }
 
     outReturn->reserve(mNameToService.size());
     for (auto const& [name, service] : mNameToService) {
