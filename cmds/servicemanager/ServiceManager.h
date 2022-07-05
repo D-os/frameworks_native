@@ -31,7 +31,7 @@ using os::ServiceDebugInfo;
 
 class ServiceManager : public os::BnServiceManager, public IBinder::DeathRecipient {
 public:
-    ServiceManager(std::unique_ptr<Access>&& access);
+    ServiceManager(/*std::unique_ptr<Access>&& access*/);
     ~ServiceManager();
 
     // getService will try to start any services it cannot find
@@ -96,7 +96,7 @@ private:
     ServiceCallbackMap mNameToRegistrationCallback;
     ClientCallbackMap mNameToClientCallback;
 
-    std::unique_ptr<Access> mAccess;
+    // std::unique_ptr<Access> mAccess;
 };
 
 }  // namespace android
