@@ -200,8 +200,8 @@ status_t Parcel::finishUnflattenBinder(
 }
 
 #ifdef BINDER_WITH_KERNEL_IPC
-static constexpr inline int schedPolicyMask(int policy, int priority) {
-    return (priority & FLAT_BINDER_FLAG_PRIORITY_MASK) | ((policy & 3) << FLAT_BINDER_FLAG_SCHED_POLICY_SHIFT);
+static constexpr inline int schedPolicyMask(int, int priority) {
+    return (priority & FLAT_BINDER_FLAG_PRIORITY_MASK);
 }
 #endif // BINDER_WITH_KERNEL_IPC
 
@@ -262,12 +262,12 @@ status_t Parcel::flattenBinder(const sp<IBinder>& binder) {
                 schedBits = schedPolicyMask(policy, priority);
             }
             obj.flags = FLAT_BINDER_FLAG_ACCEPTS_FDS;
-            if (local->isRequestingSid()) {
-                obj.flags |= FLAT_BINDER_FLAG_TXN_SECURITY_CTX;
-            }
-            if (local->isInheritRt()) {
-                obj.flags |= FLAT_BINDER_FLAG_INHERIT_RT;
-            }
+            // if (local->isRequestingSid()) {
+            //     obj.flags |= FLAT_BINDER_FLAG_TXN_SECURITY_CTX;
+            // }
+            // if (local->isInheritRt()) {
+            //     obj.flags |= FLAT_BINDER_FLAG_INHERIT_RT;
+            // }
             obj.hdr.type = BINDER_TYPE_BINDER;
             obj.binder = reinterpret_cast<uintptr_t>(local->getWeakRefs());
             obj.cookie = reinterpret_cast<uintptr_t>(local);

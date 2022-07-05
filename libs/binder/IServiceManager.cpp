@@ -167,7 +167,7 @@ void setDefaultServiceManager(const sp<IServiceManager>& sm) {
     }
 }
 
-#if !defined(__ANDROID_VNDK__)
+#if 0
 // IPermissionController is not accessible to vendors
 
 bool checkCallingPermission(const String16& permission)
@@ -562,7 +562,7 @@ std::vector<IServiceManager::ServiceDebugInfo> ServiceManagerShim::getServiceDeb
     return ret;
 }
 
-#ifndef __ANDROID__
+#if 0
 // ServiceManagerShim for host. Implements the old libbinder android::IServiceManager API.
 // The internal implementation of the AIDL interface android::os::IServiceManager calls into
 // on-device service manager.
