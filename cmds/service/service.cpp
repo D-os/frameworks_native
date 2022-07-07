@@ -34,6 +34,8 @@
 
 using namespace android;
 
+#define __ANDROID__
+
 void writeString16(Parcel& parcel, const char* string)
 {
     if (string != nullptr)
