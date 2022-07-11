@@ -33,6 +33,7 @@
 #include <binder/IPermissionController.h>
 #endif
 
+#define __ANDROID__
 #ifdef __ANDROID__
 #include <cutils/properties.h>
 #else
