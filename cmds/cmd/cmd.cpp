@@ -37,8 +37,8 @@
 #include <errno.h>
 #include <memory>
 
-#include "selinux/selinux.h"
-#include "selinux/android.h"
+// #include "selinux/selinux.h"
+// #include "selinux/android.h"
 
 #include "cmd.h"
 
@@ -51,12 +51,12 @@ static int sort_func(const String16* lhs, const String16* rhs)
     return lhs->compare(*rhs);
 }
 
-struct SecurityContext_Delete {
-    void operator()(char* p) const {
-        freecon(p);
-    }
-};
-typedef std::unique_ptr<char[], SecurityContext_Delete> Unique_SecurityContext;
+// struct SecurityContext_Delete {
+//     void operator()(char* p) const {
+//         freecon(p);
+//     }
+// };
+// typedef std::unique_ptr<char[], SecurityContext_Delete> Unique_SecurityContext;
 
 class MyShellCallback : public BnShellCallback
 {
@@ -81,24 +81,24 @@ public:
         ALOGD("openFile: %s, full=%s", path8.string(), fullPath.string());
 #endif
         int flags = 0;
-        bool checkRead = false;
-        bool checkWrite = false;
-        if (mode == u"w") {
-            flags = O_WRONLY|O_CREAT|O_TRUNC;
-            checkWrite = true;
-        } else if (mode == u"w+") {
-            flags = O_RDWR|O_CREAT|O_TRUNC;
-            checkRead = checkWrite = true;
-        } else if (mode == u"r") {
-            flags = O_RDONLY;
-            checkRead = true;
-        } else if (mode == u"r+") {
-            flags = O_RDWR;
-            checkRead = checkWrite = true;
-        } else {
-            mErrorLog << "Invalid mode requested: " << mode.string() << endl;
-            return -EINVAL;
-        }
+        // bool checkRead = false;
+        // bool checkWrite = false;
+        // if (mode == u"w") {
+        //     flags = O_WRONLY|O_CREAT|O_TRUNC;
+        //     checkWrite = true;
+        // } else if (mode == u"w+") {
+        //     flags = O_RDWR|O_CREAT|O_TRUNC;
+        //     checkRead = checkWrite = true;
+        // } else if (mode == u"r") {
+        //     flags = O_RDONLY;
+        //     checkRead = true;
+        // } else if (mode == u"r+") {
+        //     flags = O_RDWR;
+        //     checkRead = checkWrite = true;
+        // } else {
+        //     mErrorLog << "Invalid mode requested: " << mode.string() << endl;
+        //     return -EINVAL;
+        // }
         int fd = open(fullPath.string(), flags, S_IRWXU|S_IRWXG);
 #if DEBUG
         ALOGD("openFile: fd=%d", fd);
@@ -106,36 +106,36 @@ public:
         if (fd < 0) {
             return fd;
         }
-        if (is_selinux_enabled() && seLinuxContext.size() > 0) {
-            String8 seLinuxContext8(seLinuxContext);
-            char* tmp = nullptr;
-            getfilecon(fullPath.string(), &tmp);
-            Unique_SecurityContext context(tmp);
-            if (checkWrite) {
-                int accessGranted = selinux_check_access(seLinuxContext8.string(), context.get(),
-                        "file", "write", nullptr);
-                if (accessGranted != 0) {
-#if DEBUG
-                    ALOGD("openFile: failed selinux write check!");
-#endif
-                    close(fd);
-                    mErrorLog << "System server has no access to write file context " << context.get() << " (from path " << fullPath.string() << ", context " << seLinuxContext8.string() << ")" << endl;
-                    return -EPERM;
-                }
-            }
-            if (checkRead) {
-                int accessGranted = selinux_check_access(seLinuxContext8.string(), context.get(),
-                        "file", "read", nullptr);
-                if (accessGranted != 0) {
-#if DEBUG
-                    ALOGD("openFile: failed selinux read check!");
-#endif
-                    close(fd);
-                    mErrorLog << "System server has no access to read file context " << context.get() << " (from path " << fullPath.string() << ", context " << seLinuxContext8.string() << ")" << endl;
-                    return -EPERM;
-                }
-            }
-        }
+//         if (is_selinux_enabled() && seLinuxContext.size() > 0) {
+//             String8 seLinuxContext8(seLinuxContext);
+//             char* tmp = nullptr;
+//             getfilecon(fullPath.string(), &tmp);
+//             Unique_SecurityContext context(tmp);
+//             if (checkWrite) {
+//                 int accessGranted = selinux_check_access(seLinuxContext8.string(), context.get(),
+//                         "file", "write", nullptr);
+//                 if (accessGranted != 0) {
+// #if DEBUG
+//                     ALOGD("openFile: failed selinux write check!");
+// #endif
+//                     close(fd);
+//                     mErrorLog << "System server has no access to write file context " << context.get() << " (from path " << fullPath.string() << ", context " << seLinuxContext8.string() << ")" << endl;
+//                     return -EPERM;
+//                 }
+//             }
+//             if (checkRead) {
+//                 int accessGranted = selinux_check_access(seLinuxContext8.string(), context.get(),
+//                         "file", "read", nullptr);
+//                 if (accessGranted != 0) {
+// #if DEBUG
+//                     ALOGD("openFile: failed selinux read check!");
+// #endif
+//                     close(fd);
+//                     mErrorLog << "System server has no access to read file context " << context.get() << " (from path " << fullPath.string() << ", context " << seLinuxContext8.string() << ")" << endl;
+//                     return -EPERM;
+//                 }
+//             }
+//         }
         return fd;
     }
 };
