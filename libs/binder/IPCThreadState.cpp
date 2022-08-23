@@ -42,6 +42,8 @@
 #include "Static.h"
 #include "binder_module.h"
 
+#define __ANDROID__
+
 #if LOG_NDEBUG
 
 #define IF_LOG_TRANSACTIONS() if (false)
