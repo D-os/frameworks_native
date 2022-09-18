@@ -21,6 +21,7 @@
 
 #include <binder/IPCThreadState.h>
 #include <binder/IResultReceiver.h>
+#include <binder/IShellCallback.h>
 #include <binder/RpcSession.h>
 #include <binder/Stability.h>
 #include <cutils/compiler.h>
@@ -281,6 +282,25 @@ status_t BpBinder::dump(int fd, const Vector<String16>& args)
     }
     status_t err = transact(DUMP_TRANSACTION, send, &reply);
     return err;
+}
+
+status_t BpBinder::shellCommand(int in, int out, int err, Vector<String16>& args,
+                                const sp<IShellCallback>& callback,
+                                const sp<IResultReceiver>& resultReceiver)
+{
+    Parcel send;
+    Parcel reply;
+    send.writeFileDescriptor(in);
+    send.writeFileDescriptor(out);
+    send.writeFileDescriptor(err);
+    const size_t numArgs = args.size();
+    send.writeInt32(numArgs);
+    for (size_t i = 0; i < numArgs; i++) {
+        send.writeString16(args[i]);
+    }
+    send.writeStrongBinder(callback != nullptr ? IInterface::asBinder(callback) : nullptr);
+    send.writeStrongBinder(resultReceiver != nullptr ? IInterface::asBinder(resultReceiver) : nullptr);
+    return transact(SHELL_COMMAND_TRANSACTION, send, &reply);
 }
 
 // NOLINTNEXTLINE(google-default-arguments)

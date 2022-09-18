@@ -103,8 +103,8 @@ public:
     virtual bool            isBinderAlive() const = 0;
     virtual status_t        pingBinder() = 0;
     virtual status_t        dump(int fd, const Vector<String16>& args) = 0;
-    static  status_t        shellCommand(const sp<IBinder>& target, int in, int out, int err,
-                                         Vector<String16>& args, const sp<IShellCallback>& callback,
+    virtual status_t        shellCommand(int in, int out, int err, Vector<String16>& args,
+                                         const sp<IShellCallback>& callback,
                                          const sp<IResultReceiver>& resultReceiver);
 
     /**

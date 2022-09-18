@@ -235,8 +235,7 @@ int cmdMain(const std::vector<std::string_view>& argv, TextOutput& outputLog, Te
           static_cast<int>(cmd.size()), cmd.data(), in, out, err);
 #endif
 
-    // TODO: block until a result is returned to MyResultReceiver.
-    status_t error = IBinder::shellCommand(service, in, out, err, args, cb, result);
+    status_t error = service->shellCommand(in, out, err, args, cb, result);
     if (error < 0) {
         const char* errstr;
         switch (error) {

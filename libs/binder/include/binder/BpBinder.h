@@ -49,6 +49,9 @@ public:
     virtual bool        isBinderAlive() const;
     virtual status_t    pingBinder();
     virtual status_t    dump(int fd, const Vector<String16>& args);
+    virtual status_t    shellCommand(int in, int out, int err, Vector<String16>& args,
+                                     const sp<IShellCallback>& callback,
+                                     const sp<IResultReceiver>& resultReceiver);
 
     // NOLINTNEXTLINE(google-default-arguments)
     virtual status_t    transact(   uint32_t code,
